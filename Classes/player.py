@@ -87,6 +87,9 @@ class Player:
         # Might need some help with this method. Played poker like 5 times but have no clue how to play.
         ###This will be an input loop similar to what happens in main. We will await input from the user in terms of buttons
         self.draw_board()
+        self.info()
+        self.button_area()
+        i = 0
         for i in range(len(self.buttons)):
             print(i)
         print(f'Total buttons = {i + 1}')
@@ -100,14 +103,34 @@ class Player:
                         if pos[1] >= 370 and pos[1] <= 414:
                             print('FOLD button clicked')
                             self.fold()
+                            return 0
                         elif pos[1] >= 423 and pos[1] <= 467:
                             print('CALL button pressed')
+                            return 1
                         elif pos[1] >= 480 and pos[1] <= 520:
                             print('CHECK button pressed')
+                            return 2
                         elif pos[1] >= 535 and pos[1] <= 577:
                             print('RAISE button pressed')
+                            turn_finished = False
+                            raise_amt = 0
+                            while not turn_finished:
+                                raise_amt = int(input('How much to raise?'))
+                                if self.stack >= raise_amt:
+                                    self.stack -= raise_amt
+                                    # add to pot?
+                                    turn_finished = True
+                                else:
+                                    print("Can't raise that amount. Not enough in stack")
+                            print(f'Amount raise: {raise_amt}')
+                            return 3
                         elif pos[1] >= 591 and pos[1] <= 633:
                             print('CONFIRM button pressed')
+                            return 4
+                        elif pos[1] >= 647 and pos[1] <= 689:
+                            print('QUIT button pressed')
+                            pygame.quit()
+                            # return -1
                         else:
                             print('No button was pressed')
                 if event.type == pygame.QUIT:
@@ -172,14 +195,16 @@ class Player:
 
     def draw_board(self):
         self.win.fill(BACKGROUND_COLOR)
+        railing = pygame.draw.circle(self.win, RAILING_COLOR, (WIDTH // 2 + OFFSET, HEIGHT // 2), BOARD_RADIUS * 1.1)
         board = pygame.draw.circle(self.win, BOARD_COLOR, (WIDTH // 2 + OFFSET, HEIGHT // 2), BOARD_RADIUS)
         inner_circle = pygame.draw.circle(self.win, WHITE, (WIDTH // 2 + OFFSET, HEIGHT // 2), INNER_BORDER_RADIUS, width=1)
-        self.draw_chips()       # Won't need if for loop works
-        self.draw_board_cards()
-        self.info()
-        self.button_area()
-        self.draw_cards()
-        self.draw_opponents()
+
+        # self.draw_chips()       # Won't need if for loop works
+        # self.draw_board_cards()
+        # self.info()
+        # self.button_area()
+        # self.draw_cards()
+        # self.draw_opponents()
 
     def draw_chips(self):
         pygame.draw.circle(self.win, WHITE, (self.chip_pos[0] + OFFSET, self.chip_pos[1]), CHIP_SIZE)
@@ -188,8 +213,11 @@ class Player:
 
     def info(self):
         pygame.draw.rect(self.win, BOARD_CARDS_BOX_COLOR, (25, 25, INFO_BOX_WIDTH, HEIGHT - 60))
-        self.hand[0].draw_big(self.win, 35, 35)
-        self.hand[1].draw_big(self.win, 35 + MAG_CARD_WIDTH + 15, 35)
+        # drawing blank don't use the next 2 lines in actual code. Instead use the line 3 and 4 after this line.
+        pygame.draw.rect(self.win, WHITE, (35, 35, MAG_CARD_WIDTH, MAG_CARD_HEIGHT))
+        pygame.draw.rect(self.win, WHITE, (35 + MAG_CARD_WIDTH + 15, 35, MAG_CARD_WIDTH, MAG_CARD_HEIGHT))
+        # self.hand[0].draw_big(self.win, 35, 35)
+        # self.hand[1].draw_big(self.win, 35 + MAG_CARD_WIDTH + 15, 35)
         self.win.blit(self.font.render(f'{self.player_name.split()[0].upper()} STACK = {self.stack}', True, BLACK), (25, 15 + MAG_CARD_HEIGHT + 30))
         self.win.blit(self.font.render(f'POT = '.upper(), True, BLACK), (25, 15 + MAG_CARD_HEIGHT + 30 + TOKEN_FONT_SIZE))
 
@@ -210,6 +238,9 @@ class Player:
         confirm_button = Button(self.win, 90, HEIGHT - INFO_BOX_HEIGHT + 15 * 5 + 40 * 4 - 150)
         confirm_button.draw('CONFIRM')
         self.buttons.append(confirm_button)
+        quit_button = Button(self.win, 90, HEIGHT - INFO_BOX_HEIGHT + 15 * 6 + 40 * 5 - 150)
+        quit_button.draw('QUIT')
+        self.buttons.append(quit_button)
 
 
     def get_chip_pos(self):
