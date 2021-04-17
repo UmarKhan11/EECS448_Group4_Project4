@@ -36,6 +36,7 @@ SPADE = pygame.transform.scale(pygame.image.load('Pictures/Card_spade.png'), (36
 BACKGROUND_COLOR = pygame.Color("#373737")
 BOARD_COLOR = pygame.Color("#114636")
 BOARD_CARDS_BOX_COLOR = pygame.Color("#2f4f4f")
+RAILING_COLOR = (111, 78, 55)
 
 #Poker values
 START_STACK = 1000
