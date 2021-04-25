@@ -31,6 +31,119 @@ class Player:
         self.playAgain = True
         self.raising = False
         self.pot = 0
+     ################################################################# Added test from line 34 to 146
+        self.test = []
+        self.testPlayerList = []
+
+    def create_test_players(self):
+        for i in range(8):
+            self.testPlayerList.append(Player(self.win, PLAYER_NAMES[i], i, 1000))
+            # print(self.testPlayerList[i])
+        print('\n')
+
+    def check_test_array(self, test_number, array, messageP, messageF):
+        state = True
+        for i in range(len(array)):
+            if array[i] == False:
+                state = False
+                break
+        if state:
+            print(f'Test ({test_number}) PASSED')
+            print(f'\t {messageP}')
+        else:
+            print(f'Test ({test_number}) FAILED')
+            print(f'\t {messageF}')
+        return
+
+    def test_blind(self):
+        test_number = 1
+        self.create_test_players()
+        test_array = [False, False, False, False, False, False, False, False]
+        messageP = "Blind did not affect other players stacks."
+        messageF = "Blind affected other players."
+
+        for i in range(8):
+            i_player = self.testPlayerList[i]
+            i_player.blind(100)
+            for j in range(8):
+                if j == i:
+                    pass
+                elif i_player.stack == self.testPlayerList[j].stack:
+                    test_array[i] = False
+                else:
+                    test_array[i] = True
+            self.testPlayerList[i].stack = 1000
+        self.check_test_array(test_number, test_array, messageP, messageF)
+
+    def test_receive_winnings(self):
+        test_number = 2
+        self.create_test_players()
+        test_array = [False, False, False, False, False, False, False, False]
+        messageP = "Only winner received winner money"
+        messageF = "Losers also received money"
+
+        for i in range(8):
+            i_player = self.testPlayerList[i]
+            i_player.receive_winnings(100)
+            for j in range(8):
+                if j == i:
+                    pass
+                elif i_player.stack == self.testPlayerList[j].stack:
+                    test_array[i] = False
+                else:
+                    test_array[i] = True
+            self.testPlayerList[i].stack = 1000
+        self.check_test_array(test_number, test_array, messageP, messageF)
+
+    def test_takeATurn_check(self):
+        test_number = 3
+        self.create_test_players()
+        test_array = [False, False, False, False, False, False, False, False]
+        passed = []
+        all_pass = True
+        messageP = "All turns logic was executed correctly"
+        messageF = "A turn was executed incorrectly"
+
+        for i in range(8):
+            if (self.testPlayerList[i].test_helper_takeATurn(0) and
+                self.testPlayerList[i].test_helper_takeATurn(1) and
+                self.testPlayerList[i].test_helper_takeATurn(2) and
+                self.testPlayerList[i].test_helper_takeATurn(3) and
+                self.testPlayerList[i].test_helper_takeATurn(4) and
+                    self.testPlayerList[i].test_helper_takeATurn(6)):
+                test_array[i] = True
+
+        self.check_test_array(test_number, test_array, messageP, messageF)
+
+
+    def test_helper_takeATurn(self, i):
+        cur_bet = 100
+        prev_bet = 100
+        raiseValue = 5
+
+        if i == 0:  # check
+            if (cur_bet - prev_bet) == 0:
+                self.raising = False
+            return True
+        elif i == 1:  # call
+            self.update_stack(cur_bet - prev_bet)
+            self.raising = False
+            return True
+        elif i == 2:  # raise
+            raiseValue += 10
+            return True
+        elif i == 3:  # fold
+            self.playing = False
+            self.raising = False
+            return True
+        elif i == 4:  # confirm raise
+            self.update_stack(raiseValue - prev_bet)
+            return True
+        elif i == 6:  # All in
+            temp = self.stack
+            self.update_stack(self.stack)
+            return True
+    ################################################################# Added TEST
 
     # If needing to print out a player object, will return name and player number. To use in main: print(player)
     def __str__(self):
